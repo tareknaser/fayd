@@ -1,4 +1,3 @@
-use crate::handlers::{get_balance, get_deposit_address, send_funds, sync_faucet};
 use actix_web::{App, HttpServer};
 use anyhow::Result;
 use clap::Parser;
@@ -6,8 +5,19 @@ use fayd::{Faucet, FaucetArgs};
 use paperclip::actix::{web, OpenApiExt};
 use std::sync::{Arc, Mutex};
 
+use crate::handlers::{get_balance, get_deposit_address, send_funds, sync_faucet};
+
 mod handlers;
 mod requests;
+
+#[derive(Debug, Clone, Parser)]
+#[clap(about = "Fayd is a bitcoin signet faucet")]
+struct FaucetRpcArgs {
+    #[clap(flatten)]
+    faucet_args: FaucetArgs,
+    #[clap(short, long, default_value = "8080")]
+    port: u16,
+}
 
 struct AppState {
     faucet: Arc<Mutex<Faucet>>,
@@ -15,12 +25,12 @@ struct AppState {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
-    let args = FaucetArgs::parse();
-    let faucet = Faucet::new(args)?;
+    let args = FaucetRpcArgs::parse();
+    let faucet = Faucet::new(args.faucet_args)?;
     let faucet = Arc::new(Mutex::new(faucet));
 
     let host = "127.0.0.1";
-    let port = 8080;
+    let port = args.port;
 
     HttpServer::new(move || {
         let state = AppState {
