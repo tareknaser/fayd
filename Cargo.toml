@@ -1,0 +1,6 @@
+[workspace]
+
+members = ["fayd", "fayd-rpc"]
+default-members = ["fayd", "fayd-rpc"]
+
+resolver = "2"
