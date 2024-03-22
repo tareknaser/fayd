@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{self, Args};
+use clap::{self, Parser};
 use std::path::PathBuf;
 
 use bdk::{
@@ -11,31 +11,40 @@ use bdk_file_store::Store;
 
 const DB_MAGIC: &str = "fayd";
 
-#[derive(Args, Debug, Clone)]
-#[clap(about = "Arguments for the faucet")]
+#[derive(Debug, Clone, Parser)]
+#[clap(about = "Fayd is a bitcoin signet faucet")]
 pub struct FaucetArgs {
     /// Wallet descriptor
-    #[clap(env = "DESCRIPTOR")]
+    #[clap(env = "DESCRIPTOR", long, help = "Wallet descriptor")]
     pub descriptor: String,
     /// Where to store wallet data
-    #[clap(long, default_value = ".fayd.db")]
+    #[clap(long, default_value = ".fayd.db", help = "Path to the wallet database")]
     pub db_path: PathBuf,
 
     /// RPC URL
-    #[clap(env = "RPC_URL", long, default_value = "127.0.0.1:8332")]
+    #[clap(
+        env = "RPC_URL",
+        long,
+        default_value = "127.0.0.1:8332",
+        help = "Bitcoin Core RPC URL"
+    )]
     pub url: String,
     /// RPC auth cookie file
-    #[clap(env = "RPC_COOKIE", long)]
+    #[clap(env = "RPC_COOKIE", long, help = "Bitcoin Core RPC cookie file")]
     pub rpc_cookie: Option<PathBuf>,
     /// RPC auth username
-    #[clap(env = "RPC_USER", long)]
+    #[clap(env = "RPC_USER", long, help = "Bitcoin Core RPC username")]
     pub rpc_user: Option<String>,
     /// RPC auth password
-    #[clap(env = "RPC_PASS", long)]
+    #[clap(env = "RPC_PASS", long, help = "Bitcoin Core RPC password")]
     pub rpc_pass: Option<String>,
 
     /// Amount to send to each address
-    #[clap(long, default_value = "100000")]
+    #[clap(
+        long,
+        default_value = "100000",
+        help = "Amount to send to each address"
+    )]
     pub amount: u64,
 }
 
