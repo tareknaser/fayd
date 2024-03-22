@@ -15,8 +15,16 @@ mod requests;
 struct FaucetRpcArgs {
     #[clap(flatten)]
     faucet_args: FaucetArgs,
-    #[clap(short, long, default_value = "8080")]
+    #[clap(short, long, default_value = "8080", help = "Port to listen on")]
     port: u16,
+    #[clap(subcommand)]
+    cmd: Cmd,
+}
+
+#[derive(Debug, Clone, Parser)]
+enum Cmd {
+    #[clap(about = "Run the faucet server")]
+    Run,
 }
 
 struct AppState {
