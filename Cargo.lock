@@ -696,6 +696,7 @@ dependencies = [
  "bdk_bitcoind_rpc",
  "bdk_file_store",
  "clap",
+ "log",
 ]
 
 [[package]]
@@ -707,8 +708,8 @@ dependencies = [
  "clap",
  "env_logger",
  "fayd",
+ "log",
  "paperclip",
- "serde",
  "serde_json",
 ]
 

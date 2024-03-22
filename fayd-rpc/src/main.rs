@@ -8,7 +8,6 @@ use std::sync::{Arc, Mutex};
 use crate::handlers::{get_balance, get_deposit_address, send_funds, sync_faucet};
 
 mod handlers;
-mod requests;
 
 #[derive(Debug, Clone, Parser)]
 #[clap(about = "Fayd is a bitcoin signet faucet")]
@@ -33,6 +32,7 @@ struct AppState {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     let args = FaucetRpcArgs::parse();
     let faucet = Faucet::new(args.faucet_args)?;
     let faucet = Arc::new(Mutex::new(faucet));

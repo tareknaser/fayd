@@ -41,11 +41,13 @@ impl Faucet {
 
     /// Return the balance of the faucet
     pub fn confirmed_balance(&self) -> u64 {
+        log::info!("Getting confirmed balance");
         self.wallet.get_balance().confirmed
     }
 
     /// Sync the faucet
     pub fn sync(&mut self) -> Result<()> {
+        log::info!("Syncing faucet");
         let wallet_tip = self.wallet.latest_checkpoint();
         let emitter_tip = wallet_tip.clone();
         let (sender, receiver) = sync_channel::<Emission>(21);
@@ -55,6 +57,7 @@ impl Faucet {
         spawn(move || -> Result<()> {
             let mut emitter = Emitter::new(&client, emitter_tip, start_height);
             while let Some(emission) = emitter.next_block()? {
+                log::info!("Emitting block at height {}", emission.block_height());
                 sender.send(Emission::Block(emission))?;
             }
             sender.send(Emission::Mempool(emitter.mempool()?))?;
@@ -65,6 +68,7 @@ impl Faucet {
             match emission {
                 Emission::Block(block_emission) => {
                     let height = block_emission.block_height();
+                    log::info!("Applying block at height {}", height);
                     let connected_to = block_emission.connected_to();
                     self.wallet.apply_block_connected_to(
                         &block_emission.block,
@@ -74,6 +78,7 @@ impl Faucet {
                     self.wallet.commit()?;
                 }
                 Emission::Mempool(mempool_emission) => {
+                    log::info!("Applying mempool emission");
                     self.wallet.apply_unconfirmed_txs(
                         mempool_emission.iter().map(|(tx, time)| (tx, *time)),
                     );
@@ -87,6 +92,7 @@ impl Faucet {
 
     /// Send funds to an address
     pub fn send(&mut self, address: &str) -> Result<Txid> {
+        log::info!("Sending funds to {}", address);
         let wallet_balance = self.confirmed_balance();
         if wallet_balance < self.args.amount() {
             return Err(anyhow!("Insufficient funds"));
@@ -126,6 +132,7 @@ impl Faucet {
     ///
     /// Returns the address to send funds to
     pub fn deposit(&mut self) -> Result<String> {
+        log::info!("Getting deposit address");
         let address = self
             .wallet
             .try_get_address(bdk::wallet::AddressIndex::New)

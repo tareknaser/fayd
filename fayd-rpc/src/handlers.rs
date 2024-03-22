@@ -1,11 +1,12 @@
-use crate::{requests::Send, AppState};
+use crate::AppState;
 use actix_web::{error, web, Error, HttpResponse};
-use paperclip::actix::{api_v2_operation, get, post, web::Json};
+use paperclip::actix::{api_v2_operation, get, post};
 
 /// Endpoint for getting the Faucet balance
 #[api_v2_operation]
 #[get("/balance")]
 pub async fn get_balance(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
+    log::info!("/balance endpoint called");
     let faucet = data
         .faucet
         .lock()
@@ -21,6 +22,7 @@ pub async fn get_balance(data: web::Data<AppState>) -> Result<HttpResponse, Erro
 #[api_v2_operation]
 #[post("/sync")]
 pub async fn sync_faucet(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
+    log::info!("/sync endpoint called");
     let mut faucet = data
         .faucet
         .lock()
@@ -36,16 +38,15 @@ pub async fn sync_faucet(data: web::Data<AppState>) -> Result<HttpResponse, Erro
 /// Endpoint for sending funds to an address
 #[api_v2_operation]
 #[post("/send")]
-pub async fn send_funds(
-    data: web::Data<AppState>,
-    body: Json<Send>,
-) -> Result<HttpResponse, Error> {
+pub async fn send_funds(data: web::Data<AppState>, body: String) -> Result<HttpResponse, Error> {
+    let address = body;
+    log::info!("/send endpoint called to send funds to {:?}", address);
     let mut faucet = data
         .faucet
         .lock()
         .map_err(|err| actix_web::error::ErrorInternalServerError(format!("Error: {}", err)))?;
 
-    let address = body.address.clone();
+    let address = address.clone();
     let result = faucet.send(&address);
     match result {
         Ok(txid) => Ok(HttpResponse::Ok().body(format!("Sent funds to {}", txid))),
@@ -57,6 +58,7 @@ pub async fn send_funds(
 #[api_v2_operation]
 #[get("/deposit")]
 pub async fn get_deposit_address(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
+    log::info!("/deposit endpoint called");
     let mut faucet = data
         .faucet
         .lock()
