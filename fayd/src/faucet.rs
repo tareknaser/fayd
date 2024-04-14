@@ -104,9 +104,10 @@ impl Faucet {
 
         let address =
             Address::from_str(address).map_err(|e| anyhow!("Failed to parse address: {}", e))?;
+        let network = Network::from(self.args.network.clone());
         let address = address
-            .require_network(Network::Signet)
-            .map_err(|e| anyhow!("Address is not on the Signet network: {}", e))?;
+            .require_network(network)
+            .map_err(|e| anyhow!("Address is not on the correct network: {}", e))?;
 
         let mut tx_builder = self.wallet.build_tx();
         tx_builder

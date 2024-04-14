@@ -1,0 +1,27 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Fayd
+        run: cargo build --release
+
+      - name: Run bitcoin
+        run: ./integration/setup.sh
+
+      - name: Run Integration Tests
+        run: ./integration/sanity_check.sh

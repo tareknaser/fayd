@@ -1,0 +1,37 @@
+name: Sanity Check Codebase
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Sanity Check Codebase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly # nightly is required for fmt
+          components: rustfmt, clippy
+
+      - name: Print Cargo version
+        run: cargo --version
+
+      - name: Check formatting
+        run: |
+          cargo fmt -- --check
+
+      - name: Check linting
+        run: |
+          cargo clippy --workspace
+
+      - name: Build and test
+        run: |
+          cargo test --workspace
