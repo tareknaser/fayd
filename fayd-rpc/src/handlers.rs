@@ -13,9 +13,11 @@ pub async fn get_balance(data: web::Data<AppState>) -> Result<HttpResponse, Erro
         .map_err(|err| actix_web::error::ErrorInternalServerError(format!("Error: {}", err)))?;
 
     let result = faucet.confirmed_balance();
-    let val = serde_json::to_value(result)
-        .map_err(|err| actix_web::error::ErrorInternalServerError(format!("Error: {}", err)))?;
-    Ok(HttpResponse::Ok().json(val))
+    let response = serde_json::json!({
+        "status": "success",
+        "confirmed_balance_msat": result,
+    });
+    Ok(HttpResponse::Ok().json(response))
 }
 
 /// Endpoint for syncing the Faucet
@@ -30,7 +32,13 @@ pub async fn sync_faucet(data: web::Data<AppState>) -> Result<HttpResponse, Erro
 
     let result = faucet.sync();
     match result {
-        Ok(_) => Ok(HttpResponse::Ok().body("Faucet synced")),
+        Ok(_) => {
+            let response = serde_json::json!({
+                "status": "success",
+                "message": "Faucet synced successfully",
+            });
+            Ok(HttpResponse::Ok().json(response))
+        }
         Err(err) => Err(error::ErrorInternalServerError(format!("Error: {}", err))),
     }
 }
@@ -49,7 +57,13 @@ pub async fn send_funds(data: web::Data<AppState>, body: String) -> Result<HttpR
     let address = address.clone();
     let result = faucet.send(&address);
     match result {
-        Ok(txid) => Ok(HttpResponse::Ok().body(format!("Sent funds to {}", txid))),
+        Ok(txid) => {
+            let response = serde_json::json!({
+                "status": "success",
+                "txid": txid,
+            });
+            Ok(HttpResponse::Ok().json(response))
+        }
         Err(err) => Err(error::ErrorInternalServerError(format!("Error: {}", err))),
     }
 }
@@ -66,7 +80,13 @@ pub async fn get_deposit_address(data: web::Data<AppState>) -> Result<HttpRespon
 
     let address = faucet.deposit();
     match address {
-        Ok(address) => Ok(HttpResponse::Ok().body(address)),
+        Ok(address) => {
+            let response = serde_json::json!({
+                "status": "success",
+                "address": address,
+            });
+            Ok(HttpResponse::Ok().json(response))
+        }
         Err(err) => Err(error::ErrorInternalServerError(format!("Error: {}", err))),
     }
 }
