@@ -87,6 +87,10 @@ impl Faucet {
                 }
             }
         }
+        log::info!(
+            "Latest block height: {}",
+            self.wallet.latest_checkpoint().height()
+        );
         Ok(())
     }
 

@@ -11,6 +11,26 @@ use bdk_file_store::Store;
 
 const DB_MAGIC: &str = "fayd";
 
+#[derive(Debug, Clone, clap::ValueEnum)]
+pub enum FaucetNetwork {
+    #[clap(name = "testnet")]
+    Testnet,
+    #[clap(name = "signet")]
+    Signet,
+    #[clap(name = "regtest")]
+    Regtest,
+}
+
+impl From<FaucetNetwork> for Network {
+    fn from(network: FaucetNetwork) -> Self {
+        match network {
+            FaucetNetwork::Testnet => Network::Testnet,
+            FaucetNetwork::Signet => Network::Signet,
+            FaucetNetwork::Regtest => Network::Regtest,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Parser)]
 #[clap(about = "Fayd is a bitcoin signet faucet")]
 pub struct FaucetArgs {
@@ -21,6 +41,9 @@ pub struct FaucetArgs {
     #[clap(long, default_value = ".fayd.db", help = "Path to the wallet database")]
     pub db_path: PathBuf,
 
+    /// Network to use
+    #[clap(long, default_value = "signet", help = "Network to use")]
+    pub network: FaucetNetwork,
     /// RPC URL
     #[clap(
         env = "RPC_URL",
@@ -68,7 +91,8 @@ impl FaucetArgs {
 
     pub(crate) fn wallet(&self) -> Result<Wallet<Store<ChangeSet>>> {
         let db = Store::<ChangeSet>::open_or_create_new(DB_MAGIC.as_bytes(), self.db_path.clone())?;
-        let wallet = Wallet::new_or_load(self.descriptor.as_str(), None, db, Network::Signet)?;
+        let network = Network::from(self.network.clone());
+        let wallet = Wallet::new_or_load(self.descriptor.as_str(), None, db, network)?;
         Ok(wallet)
     }
 }

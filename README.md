@@ -54,6 +54,7 @@ Commands:
 Options:
       --descriptor <DESCRIPTOR>  Wallet descriptor [env: DESCRIPTOR=]
       --db-path <DB_PATH>        Path to the wallet database [default: .fayd.db]
+      --network <NETWORK>        Network to use [default: signet] [possible values: testnet, signet, regtest]
       --url <URL>                Bitcoin Core RPC URL [env: RPC_URL=] [default: 127.0.0.1:8332]
       --rpc-cookie <RPC_COOKIE>  Bitcoin Core RPC cookie file [env: RPC_COOKIE=]
       --rpc-user <RPC_USER>      Bitcoin Core RPC username [env: RPC_USER=]
